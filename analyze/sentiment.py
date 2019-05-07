@@ -27,24 +27,26 @@ def predict(analyze_str):
     analyze_list = analyze_str[:-2].split('||')
     analyze_list.reverse()
     senti = [SnowNLP(i).sentiments for i in analyze_list if len(i) > 2]
+    noun = [i[0] for i in SnowNLP(analyze_str[:-2]).tags if i[1] == 'n']
+
 
     res = 'no_trend'
     if len(senti) > 2:
         if senti[0] > 0.65:
             res = 'pos'
-        elif len(senti) > 4 and (senti[0] + senti[1] + senti[2]) / 3 - (senti[-1] + senti[-2] + senti[3]) / 3 > 0.3:
+        elif len(senti) > 4 and (senti[0] + senti[1] + senti[2]) / 3 - (senti[-1] + senti[-2] + senti[-3]) / 3 > 0.3:
             res = 'pos'
         elif (senti[0] + senti[1]) / 2 < 0.4:
             res = 'neg'
 
-    return senti, res
+    return senti, res, noun
 
 
 if __name__ == '__main__':
     dict = construct_dict()
     csv_file = open("./res.csv", "w")
     writer = csv.writer(csv_file)
-
+    i = 0
     for k in dict.keys():
         senti, trend = predict(dict[k])
         writer.writerow([k, dict[k], senti, trend])
