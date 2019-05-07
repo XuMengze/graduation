@@ -29,7 +29,6 @@ def predict(analyze_str):
     senti = [SnowNLP(i).sentiments for i in analyze_list if len(i) > 2]
     noun = [i[0] for i in SnowNLP(analyze_str[:-2]).tags if i[1] == 'n']
 
-
     res = 'no_trend'
     if len(senti) > 2:
         if senti[0] > 0.65:
