@@ -30,14 +30,19 @@ def predict(analyze_str):
     noun = [i[0] for i in SnowNLP(analyze_str[:-2]).tags if i[1] == 'n']
 
     res = 'no_trend'
+    if len(senti) == 1:
+        res = 'pos' if senti[0] > 0.6 else ('neg' if senti[0] < 0.4 else 'no_trend')
+    if len(senti) == 2:
+        res = 'pos' if senti[0] - senti[1] > 0.2 else ('neg' if senti[0] - senti[1] < 0 else 'no_trend')
     if len(senti) > 2:
         if senti[0] > 0.65:
             res = 'pos'
-        elif len(senti) > 4 and (senti[0] + senti[1] + senti[2]) / 3 - (senti[-1] + senti[-2] + senti[-3]) / 3 > 0.3:
+        elif len(senti) > 4 and (senti[0] + senti[1] + senti[2]) / 3 - (senti[-1] + senti[-2] + senti[-3]) / 3 > 0.2:
             res = 'pos'
+        elif len(senti) > 4 and (senti[0] + senti[1] + senti[2]) / 3 - (senti[-1] + senti[-2] + senti[-3]) / 3 < 0:
+            res = 'neg'
         elif (senti[0] + senti[1]) / 2 < 0.4:
             res = 'neg'
-
     return senti, res, noun
 
 
