@@ -3,9 +3,12 @@ from gensim import models
 from gensim import corpora
 from gensim import similarities
 import xlrd
+import re
 
 
 def lda_res(sentences):
+    jieba.load_userdict('data/dic.txt')
+    print(sentences)
     # sentences = ["我喜欢吃土豆", "土豆是个百搭的东西", "我不喜欢今天雾霾的北京"]
     words = []
     for doc in sentences:
@@ -21,14 +24,14 @@ def lda_res(sentences):
 
     tfidf = models.TfidfModel(corpus)
 
-    vec = [(0, 1), (4, 1)]
     print()
     corpus_tfidf = tfidf[corpus]
     for doc in corpus_tfidf:
         print(doc)
-    index = similarities.SparseMatrixSimilarity(tfidf[corpus], num_features=14)
-    sims = index[tfidf[vec]]
-    print(list(enumerate(sims)))
+    # vec = [(0, 1), (4, 1)]
+    # index = similarities.SparseMatrixSimilarity(tfidf[corpus], num_features=14)
+    # sims = index[tfidf[vec]]
+    # print(list(enumerate(sims)))
 
     lsi = models.LsiModel(corpus_tfidf, id2word=dic, num_topics=2)
     lsiout = lsi.print_topics(2)
@@ -47,10 +50,10 @@ def lda_res(sentences):
     for doc in corpus_lda:
         print(doc)
 
-    print(lda.log_perplexity(corpus[2:]))
-    lda2 = models.LdaModel(corpus_tfidf, id2word=dic, num_topics=3)
-    ldaOut2 = lda2.print_topics(3)
-    print(lda2.log_perplexity(corpus[2:]))
+    # print(lda.log_perplexity(corpus[2:]))
+    # lda2 = models.LdaModel(corpus_tfidf, id2word=dic, num_topics=3)
+    # ldaOut2 = lda2.print_topics(3)
+    # print(lda2.log_perplexity(corpus[2:]))
 
 
 def split_corpse():
@@ -226,14 +229,19 @@ def split_corpse():
 
     str_list = []
     str_list_inner = []
+    pattern = re.compile(r'(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]')
+    pattern_mark = re.compile(r'[\s+\.\!\/_,$%^*(+\"\')]+|[+——()?【】“”！，。？、~@#￥%……&*（）☆《》\d+年月日·：↓]+')
     for i in range(sheet1.nrows):
         if id_list.__contains__(int(sheet1.row_values(i)[2])):
             str_list.append(str_list_inner.copy())
             str_list_inner = []
-        str_list_inner.append(sheet1.row_values(i)[6])
-    for i in range(len(str_list)):
-        print(str_list[i])
+        string = sheet1.row_values(i)[6].replace('#阴阳师手游[超话]#', '').replace('\n', '').replace('#阴阳师手游#', '').strip()
+        string = re.sub(pattern, '', string)
+        string = re.sub(pattern_mark, '', string)
+        str_list_inner.append(string)
+    return str_list
 
 
 if __name__ == '__main__':
-    split_corpse()
+    sentences_list = split_corpse()
+    lda_res(sentences_list[40])
